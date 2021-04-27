@@ -9,6 +9,8 @@ import csv
 import numpy as np
 from numpy import random
 import time
+import string
+
 
 """* * * TRAINING * * *"""
 def init_synapses(X, hidden_neurons, classes):
@@ -177,23 +179,59 @@ def classify(words, classes, sentence):
     print("\nSentence to classify: {0}\nClassification: {1}".format(sentence, return_results))
     return return_results
 
-def get_raw_training_data():
+def get_raw_training_data(filename):
     """Gets raw training data.
     """
+    
+    training_data = {}
+    with open(filename, newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in spamreader:
+            person = row[0].lower()
+            sentence = row[1].lower()
+            key = (row[0].lower(), row[1].lower())
+            training_data[key] = row[1].lower()        
+    return training_data
+    
+def preprocess_words(words, stemmer):
+    stem_list = []
+    for word in words:
+        word.translate(str.maketrans('', '', string.punctuation))
+        stem_list.append(stemmer.stem(word))
+    print(stem_list)
+
+def organize_raw_training_data(raw_training_data, stemmer):
+    tokens = nltk.word_tokenize(raw_training_data)
+    # return words, classes, documents 
+    classes = []
+    if name not in classes:
+        classes.append(name)
+    print(tokens)
+
+def sigmoid_output_to_derivative(output):
+    """Convert the sigmoid function's output to its derivative."""
+    return output * (1-output)
 
 def main():
     """TODO: more instructions here..."""
 
-    stemmer = LancasterStemmer()
-    raw_training_data = get_raw_training_data('dialogue_data.csv')
+    #training_data, output = create_training_data(words, classes, documents, stemmer)
 
+    stemmer = LancasterStemmer()
+    # preprocess_words(['swimming', 'dancing!', '?'], stemmer)
+    raw_training_data = get_raw_training_data('dialogue_data.csv')
+    
     # Comment this out if you have already trained once and don't want to re-train.
     # start_training(words, classes, training_data, output)
+    # words, classes, documents = organize_raw_training_data(raw_training_data, stemmer)
 
+
+    organize_raw_training_data(raw_training_data, stemmer)
     # Classify new sentences.
     #classify(words, classes, "will you look into the mirror?")
     #classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
     #classify(words, classes, "the thieves!")
+    #get_raw_training_data('dialogue_data.csv')
 
 
 if __name__ == "__main__":
