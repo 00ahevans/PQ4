@@ -1,6 +1,14 @@
 """TODO: add more here..."""
 
+import nltk
+from nltk.stem.lancaster import LancasterStemmer
+import os
+import json
+import datetime
+import csv
 import numpy as np
+from numpy import random
+import time
 
 """* * * TRAINING * * *"""
 def init_synapses(X, hidden_neurons, classes):
@@ -169,17 +177,23 @@ def classify(words, classes, sentence):
     print("\nSentence to classify: {0}\nClassification: {1}".format(sentence, return_results))
     return return_results
 
+def get_raw_training_data():
+    """Gets raw training data.
+    """
 
 def main():
     """TODO: more instructions here..."""
 
+    stemmer = LancasterStemmer()
+    raw_training_data = get_raw_training_data('dialogue_data.csv')
+
     # Comment this out if you have already trained once and don't want to re-train.
-    start_training(words, classes, training_data, output)
+    # start_training(words, classes, training_data, output)
 
     # Classify new sentences.
-    classify(words, classes, "will you look into the mirror?")
-    classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
-    classify(words, classes, "the thieves!")
+    #classify(words, classes, "will you look into the mirror?")
+    #classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
+    #classify(words, classes, "the thieves!")
 
 
 if __name__ == "__main__":
