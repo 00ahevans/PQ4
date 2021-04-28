@@ -10,6 +10,7 @@ import numpy as np
 from numpy import random
 import time
 import string
+import re
 
 
 """* * * TRAINING * * *"""
@@ -180,37 +181,120 @@ def classify(words, classes, sentence):
     return return_results
 
 def get_raw_training_data(filename):
-    """Gets raw training data.
-    """
+    """Creates raw training data.
     
-    training_data = {}
+        Args:
+            filename (str): name of csv file
+        
+        Returns:
+            training_data (list): list of training data
+    """
+    training_data = []
+    punctuations = '''!()-[]/{/};:'"\,<>./?@`#$%^&*_~'''
     with open(filename, newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in spamreader:
-            person = row[0].lower()
+            new_dict = {}
+            new_dict['person'] = row[0].lower()
+            # removes punctuation
             sentence = row[1].lower()
-            key = (row[0].lower(), row[1].lower())
-            training_data[key] = row[1].lower()        
+            new_sentence = ''
+            for char in sentence:
+                if char not in punctuations:
+                    new_sentence += char
+                else:
+                    new_sentence += " "
+            # puts sentence string into dict
+            new_dict['sentence'] = new_sentence
+            training_data.append(new_dict)
     return training_data
     
 def preprocess_words(words, stemmer):
+    """Takes in a list of words and a stemmer and returns a list of stems
+        without punctuation.
+
+        Args:
+            words (list): list of words
+            stemmer (stemmer): nltk stemmer
+
+        Returns:
+            stem_list (list): list of stems
+    """
+    #words = words.split(' ')
     stem_list = []
     for word in words:
-        word.translate(str.maketrans('', '', string.punctuation))
-        stem_list.append(stemmer.stem(word))
-    print(stem_list)
+        if word != "":
+            stem_list.append(stemmer.stem(word))
+    return stem_list
 
 def organize_raw_training_data(raw_training_data, stemmer):
-    tokens = nltk.word_tokenize(raw_training_data)
-    # return words, classes, documents 
+    """
+    Organize the raw_training_data into three lists 
+        Args:
+            raw_training_data (dictionary): dictionaries of dictionaries of 
+                actors and sentences
+            stemmer (stemmer): nltk stemmer
+
+        Returns:
+            words (list):  
+            duments (list):
+            classes (list):
+    """
+    words = []
+    documents = []
     classes = []
-    if name not in classes:
-        classes.append(name)
-    print(tokens)
+    
+    for training_line in raw_training_data:
+        tokens = (nltk.word_tokenize(training_line['sentence']))
+        name = training_line['person']
+        words.extend(preprocess_words(tokens, stemmer))
+        documents.append((preprocesses_words(tokens), name))
+        if name not in classes:
+            classes.append(name)
+    return words, classes, documents 
+
 
 def sigmoid_output_to_derivative(output):
     """Convert the sigmoid function's output to its derivative."""
     return output * (1-output)
+
+def create_training_data(stems, classes, documents, stemmer):
+    """
+    Create training_data set and output
+        Args:
+            
+
+        Returns:
+            training_data (list):  
+            output    
+    
+    """
+    training_data = []
+    for document in documents:
+        sentence = document[0]
+        actor = document[1]
+        length = len(document)
+        bag = []
+        for word in sentence:
+            if word in stems:
+                bag.append(1)
+            else:
+                bag.append(0)
+        training_data.append(bag)
+
+        output = []
+        for i in range(len(classes)):
+            if classes[i] == actor:
+                class_list = []
+                for j in range(len(classes)):
+                    if i != j:
+                        class_list.append(0)
+                    else:
+                        class_list.append(1)
+            output.append(class_list)
+
+    return training_data, output
+
 
 def main():
     """TODO: more instructions here..."""
@@ -224,8 +308,7 @@ def main():
     # Comment this out if you have already trained once and don't want to re-train.
     # start_training(words, classes, training_data, output)
     # words, classes, documents = organize_raw_training_data(raw_training_data, stemmer)
-
-
+    print(raw_training_data)
     organize_raw_training_data(raw_training_data, stemmer)
     # Classify new sentences.
     #classify(words, classes, "will you look into the mirror?")
