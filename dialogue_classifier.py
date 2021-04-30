@@ -240,18 +240,23 @@ def organize_raw_training_data(raw_training_data, stemmer):
             duments (list):
             classes (list):
     """
-    words = []
+    words = set()
     documents = []
     classes = []
     
     for training_line in raw_training_data:
         tokens = (nltk.word_tokenize(training_line['sentence']))
         name = training_line['person']
-        words.extend(preprocess_words(tokens, stemmer))
-        documents.append((preprocesses_words(tokens), name))
+        stem_list = preprocess_words(tokens, stemmer)
+        for element in stem_list:
+            words.add(element)
+        documents.append((stem_list, name))
         if name not in classes:
             classes.append(name)
-    return words, classes, documents 
+    return list(words), classes, documents 
+
+def sigmoid(z):
+    return 1/(1+ np.exp(-z))
 
 
 def sigmoid_output_to_derivative(output):
@@ -270,10 +275,11 @@ def create_training_data(stems, classes, documents, stemmer):
     
     """
     training_data = []
+    output = []
+
     for document in documents:
         sentence = document[0]
         actor = document[1]
-        length = len(document)
         bag = []
         for word in sentence:
             if word in stems:
@@ -281,17 +287,16 @@ def create_training_data(stems, classes, documents, stemmer):
             else:
                 bag.append(0)
         training_data.append(bag)
-
-        output = []
+        
+        
+        class_list = []
         for i in range(len(classes)):
+            class_list.append(0)
             if classes[i] == actor:
-                class_list = []
-                for j in range(len(classes)):
-                    if i != j:
-                        class_list.append(0)
-                    else:
-                        class_list.append(1)
-            output.append(class_list)
+                class_list[-1] = 1 
+        output.append(class_list)
+    print("training data: ", training_data)
+    print("output: ", output)
 
     return training_data, output
 
@@ -299,22 +304,20 @@ def create_training_data(stems, classes, documents, stemmer):
 def main():
     """TODO: more instructions here..."""
 
-    #training_data, output = create_training_data(words, classes, documents, stemmer)
-
     stemmer = LancasterStemmer()
-    # preprocess_words(['swimming', 'dancing!', '?'], stemmer)
     raw_training_data = get_raw_training_data('dialogue_data.csv')
     
     # Comment this out if you have already trained once and don't want to re-train.
-    # start_training(words, classes, training_data, output)
-    # words, classes, documents = organize_raw_training_data(raw_training_data, stemmer)
-    print(raw_training_data)
-    organize_raw_training_data(raw_training_data, stemmer)
+    
+    words, classes, documents = organize_raw_training_data(raw_training_data, stemmer)
+    training_data, output = create_training_data(words, classes, documents, stemmer)
+    print("words:", words)
+    start_training(words, classes, training_data, output)
     # Classify new sentences.
-    #classify(words, classes, "will you look into the mirror?")
-    #classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
-    #classify(words, classes, "the thieves!")
-    #get_raw_training_data('dialogue_data.csv')
+
+    # classify(words, classes, "will you look into the mirror?")
+    # classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
+    # classify(words, classes, "the thieves!")
 
 
 if __name__ == "__main__":
