@@ -236,9 +236,9 @@ def organize_raw_training_data(raw_training_data, stemmer):
             stemmer (stemmer): nltk stemmer
 
         Returns:
-            words (list):  
-            duments (list):
-            classes (list):
+            words (list): list of all words
+            documents (list): list of words and corresponding speakers
+            classes (list): list of classes
     """
     words = set()
     documents = []
@@ -266,13 +266,9 @@ def sigmoid_output_to_derivative(output):
 def create_training_data(stems, classes, documents, stemmer):
     """
     Create training_data set and output
-        Args:
-            
-
         Returns:
-            training_data (list):  
-            output    
-    
+            training_data (list): list of training data (as "bag of words")
+            output (list): list of classes
     """
     training_data = []
     output = []
