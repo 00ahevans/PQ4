@@ -256,6 +256,7 @@ def organize_raw_training_data(raw_training_data, stemmer):
     return list(words), classes, documents 
 
 def sigmoid(z):
+    """Returns the value of the sigmoid function for a number z """
     return 1/(1+ np.exp(-z))
 
 
@@ -266,6 +267,14 @@ def sigmoid_output_to_derivative(output):
 def create_training_data(stems, classes, documents, stemmer):
     """
     Create training_data set and output
+        Args: 
+
+        stems (list): word stems
+        documents (list): list of words and corresponding speakers
+        classes (list): list of classes
+        stemmer: nltk stemmer
+            
+
         Returns:
             training_data (list): list of training data (as "bag of words")
             output (list): list of classes
@@ -277,18 +286,16 @@ def create_training_data(stems, classes, documents, stemmer):
         sentence = document[0]
         actor = document[1]
         bag = []
-        for word in sentence:
-            if word in stems:
-                bag.append(1)
-            else:
-                bag.append(0)
+        for stem in stems:
+            bag.append(0)
+            if stem in sentence:
+                bag[-1] = 1
         training_data.append(bag)
         
-        
         class_list = []
-        for i in range(len(classes)):
+        for name in classes:
             class_list.append(0)
-            if classes[i] == actor:
+            if name == actor:
                 class_list[-1] = 1 
         output.append(class_list)
     print("training data: ", training_data)
@@ -307,14 +314,24 @@ def main():
     
     words, classes, documents = organize_raw_training_data(raw_training_data, stemmer)
     training_data, output = create_training_data(words, classes, documents, stemmer)
-    print("words:", words)
+    #print("words:", words)
     start_training(words, classes, training_data, output)
     # Classify new sentences.
 
-    # classify(words, classes, "will you look into the mirror?")
-    # classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
-    # classify(words, classes, "the thieves!")
+    classify(words, classes, "will you look into the mirror?")
+    classify(words, classes, "mithril, as light as a feather, and as hard as dragon scales.")
+    classify(words, classes, "the thieves!")
 
+    """
+    Sentence to classify: will you look into the mirror?
+    Classification: [['"bilbo"', 0.9494589420654096]]
+
+    Sentence to classify: mithril, as light as a feather, and as hard as dragon scales.
+    Classification: [['"bilbo"', 0.999706633128583]]
+
+    Sentence to classify: the thieves!
+    Classification: [['"galadriel"', 0.701596935630315]]
+    """
 
 if __name__ == "__main__":
     main()
